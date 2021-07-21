@@ -17,7 +17,7 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|min:2|max:15',
-            'email' => 'required|string|email',
+            'email' => 'required|string|email|unique:users',
             'password' => 'required|string|min:2|max:15|confirmed',
         ]); 
 
@@ -31,6 +31,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'api_token' => Str::random(64),
         ]);
+        //$user->api_token = $user->generateToken();
 
         return response()->json($user, 201);
     }
@@ -53,11 +54,20 @@ class AuthController extends Controller
 
         $user = Auth::user();
         $user->api_token = Str::random(64);
+        //$user->api_token = $user->generateToken();
         $user->save();
 
         return response()->json($user, 200);
     }
 
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        $user->api_token = null;
+        $user->save();
+        return response()->json(['message' => 'User logged out.'], 200);
+    }
 
     public function getUser(Request $request)
     {

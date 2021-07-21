@@ -22,6 +22,7 @@ Route::post('login', [AuthController::class, 'login']);
 
 Route::middleware('auth:api')->group(function(){
     Route::get('user',[AuthController::class, 'getUser']);
+    Route::get('logout',[AuthController::class, 'logout']);
 
     Route::get('articles',[ArticleController::class, 'index']);
     Route::get('articles/{id}',[ArticleController::class, 'show']);
