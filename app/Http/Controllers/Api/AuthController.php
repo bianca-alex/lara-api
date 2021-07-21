@@ -29,7 +29,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'api_token' => Str::random(60),
+            'api_token' => Str::random(64),
         ]);
 
         return response()->json($user, 201);
@@ -52,7 +52,7 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-        $user->api_token = Str::random(60);
+        $user->api_token = Str::random(64);
         $user->save();
 
         return response()->json($user, 200);
