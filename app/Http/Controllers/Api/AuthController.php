@@ -69,6 +69,34 @@ class AuthController extends Controller
         return response()->json(['message' => 'User logged out.'], 200);
     }
 
+    public function resetPass(Request $request)
+    {
+        $user = $request->user();
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string',
+            're_password' => 'required|string',
+            're_confirmed' => 'required|string',
+        ]);
+
+        if($validator->fails()){
+            $errors = $validator->errors();
+            return response()->json($errors, 401);
+        }
+
+        if($request->re_password != $request->re_confirmed){
+            return response()->json(['re_confirmed' => 'The re_password confirmation does not match.'], 401);
+        }
+
+        if(!Hash::check($request->password, $user->password)){
+            return response()->json(['message' => 'wrong password'], 401);
+        }
+        $password = Hash::make($request->re_password);
+        $user->password = $password;
+        $user->api_token = Str::random(64);
+        $user->save();
+        return response()->json($user, 200);
+    }
+
     public function getUser(Request $request)
     {
         return $request->user();
