@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Models\User;
+use Illuminate\Support\Facades\Redis;
 
 class AuthController extends Controller
 {
@@ -31,7 +32,9 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'api_token' => Str::random(64),
         ]);
-        //$user->api_token = $user->generateToken();
+        // $user->api_token = $user->generateToken();
+
+        Redis::setex($user->id, 3600, $user->api_token);
 
         return response()->json($user, 201);
     }
@@ -54,8 +57,10 @@ class AuthController extends Controller
 
         $user = Auth::user();
         $user->api_token = Str::random(64);
-        //$user->api_token = $user->generateToken();
+        // $user->api_token = $user->generateToken();
         $user->save();
+
+        Redis::setex($user->id, 3600, $user->api_token);
 
         return response()->json($user, 200);
     }
@@ -66,6 +71,8 @@ class AuthController extends Controller
 
         $user->api_token = null;
         $user->save();
+
+        Redis::del($user->id);
         return response()->json(['message' => 'User logged out.'], 200);
     }
 
@@ -94,6 +101,9 @@ class AuthController extends Controller
         $user->password = $password;
         $user->api_token = Str::random(64);
         $user->save();
+
+        Redis::setex($user->id, 3600, $user->api_token);
+
         return response()->json($user, 200);
     }
 
